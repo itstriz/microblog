@@ -52,3 +52,7 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# database
+*.db
+db_repository/*
