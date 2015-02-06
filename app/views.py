@@ -5,6 +5,15 @@ from datetime import datetime
 from forms import LoginForm, EditForm
 from models import User
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return render_template('500.html'), 500
+
 @lm.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -39,7 +48,7 @@ def index():
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():
-    form = EditForm()
+    form = EditForm(g.user.nickname)
     if form.validate_on_submit():
         g.user.nickname = form.nickname.data
         g.user.about_me = form.about_me.data
@@ -77,6 +86,7 @@ def after_login(resp):
         flash('Invalid login. Please try again.')
         return redirect(url_for('login'))
     user = User.query.filter_by(email=resp.email).first()
+
     if user is None:
         nickname = resp.nickname
         if nickname is None or nickname == "":
@@ -85,6 +95,7 @@ def after_login(resp):
         db.session.add(user)
         db.session.commit()
     remember_me = False
+
     if 'remember_me' in session:
         remember_me = session['remember_me']
         session.pop('remember_me', None)
