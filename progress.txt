@@ -6,3 +6,4 @@ Flask MegaTutorial:
 2/04/2015 - Complete Article 5 - User Logins
 2/05/2015 - Complete Article 6 - Profile Page & Avatars
 2/06/2015 - Complete Article 7 - Unit Testing
+2/07/2015 - Complete Article 8 (through Adding / removing 'followers'
