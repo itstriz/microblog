@@ -61,6 +61,56 @@ def edit():
         form.about_me.data = g.user.about_me
     return render_template('edit.html', form=form)
 
+# Follow users
+@app.route('/follow/<nickname>')
+@login_required
+def follow(nickname):
+    # Look for user by nickname
+    user = User.query.filter_by(nickname=nickname).first()
+    # If user does not exist
+    if user is None:
+        flash('User %s not found.' % nickname)
+        return redirect(url_for('index'))
+    # if user is yourself
+    if user == g.user:
+        flash('You can\'t follow yourself!')
+        return redirect(url_for('user', nickname=nickname))
+    # Use user follow function from models
+    u == g.user.follow(user)
+    if u is None:
+        flash('Cannot follow ' + nickname + '.')
+        return redirect(url_for('user', nickname=nickname))
+    # add to database and redirect
+    db.session.add(u)
+    db.session.commit()
+    flash('You are now following ' + nickname + '!')
+    return redirect(url_for('user', nickname=nickname))
+
+# unfollow function
+@app.route('/unfollow/<nickname>')
+@login_required
+def unfollow(nickname):
+    # Search for user
+    user = User.query.filter_by(nickname=nickname).first()
+    # if user does not exist
+    if user is None:
+        flash('User %s not found.' % nickname)
+        return redirect(url_for('index'))
+    # if user is yourself
+    if user == g.user:
+        flash('You can\'t unfollow yourself!')
+        return redirect(url_for('user', nickname=nickname))
+    # unfollow
+    u = g.user.unfollow(user)
+    if u is None:
+        flash('Cannot unfollow ' + nickname + '.')
+        return redirect(url_for('user', nickname=nickname))
+    # process in db
+    db.session.add(u)
+    db.session.commit()
+    flash('You have stopped following ' + nickname + '.')
+    return redirect(url_for('user', nickname=nickname))
+
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
 def login():
