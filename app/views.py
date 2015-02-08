@@ -82,11 +82,12 @@ def logout():
 
 @oid.after_login
 def after_login(resp):
+    # check if an e-mail is found
     if resp.email is None or resp.email == "":
         flash('Invalid login. Please try again.')
         return redirect(url_for('login'))
     user = User.query.filter_by(email=resp.email).first()
-
+    # check if user is not found and create one
     if user is None:
         nickname = resp.nickname
         if nickname is None or nickname == "":
@@ -94,8 +95,11 @@ def after_login(resp):
         user = User(nickname=nickname, email=resp.email)
         db.session.add(user)
         db.session.commit()
+        # make user a follower of themselves
+        db.session.add(user.follow(user))
+        db.session.commit()
     remember_me = False
-
+    # add remmber_me to session if checked
     if 'remember_me' in session:
         remember_me = session['remember_me']
         session.pop('remember_me', None)
